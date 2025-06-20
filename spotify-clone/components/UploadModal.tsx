@@ -2,9 +2,20 @@
 
 import useUploadModal from "@/hooks/useUploadModal";
 import Modal from "./Modal";
+import { FieldValues, useForm } from "react-hook-form";
 
 const UploadModal = () => {
     const uploadModal = useUploadModal();
+    const {register, handleSubmit, reset} = useForm<FieldValues>({
+        defaultValues: {
+            author: '',
+            title: '',
+            song: null,
+            image: null,
+        }
+    })
+
+
     const onChange = (open: boolean) => {
         if(!open) {
             // Reset the form
