@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-interface PlayStore {
+interface PlayerStore {
     ids: string[];
     activeId?: string;
     setId: (id: string) => void;
