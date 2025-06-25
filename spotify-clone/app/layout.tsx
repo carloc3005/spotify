@@ -26,8 +26,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
 
+  let userSongs: any[] = [];
+  
+  try {
+    userSongs = await getSongsByUserId();
+  } catch (error) {
+    console.log('Error loading user songs:', error);
+    userSongs = [];
+  }
 
-  const userSongs = await getSongsByUserId();
   return (
     <html lang="en">
       <body className={font.className}>

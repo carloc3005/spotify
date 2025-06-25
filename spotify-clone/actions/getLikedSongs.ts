@@ -4,37 +4,40 @@ import { template } from "@supabase/auth-ui-shared";
 import { cookies } from "next/headers"
 
 const getLikedSongs = async(): Promise<Song[]> => {
-    const supabase = createServerComponentClient({
-        cookies: cookies
-    });
+    try {
+        const cookieStore = cookies()
+        const supabase = createServerComponentClient({
+            cookies: () => cookieStore
+        });
 
-    const {
-        data: {
-            session
+        const {
+            data: {
+                session
+            }
+        } = await supabase.auth.getSession();
+
+        const {data, error } = await supabase 
+        .from('liked_songs')
+        .select('*, songs(*)')
+        .eq('user_id', session?.user?.id)
+        .order('created_at', {ascending: false});
+
+        if (error) {
+            console.log(error);
+            return [];
         }
-    } = await supabase.auth.getSession();
 
-    const {data, error } = await supabase 
-    .from('liked_songs')
-    .select('*, songs(*)')
-    .eq('user_id', session?.user?.id)
-    .order('created_at', {ascending: false});
+        if (!data) {
+            return [];
+        }
 
-    if (error) {
-        console.log(error);
+        return data.map((item) => ({
+            ...item.songs
+        }));
+    } catch (error) {
+        console.log('Error in getLikedSongs:', error);
         return [];
     }
-
-    if (!data) {
-        return [];
-    }
-
-    
-
-    return data.map((item) => ({
-        ...item.songs
-    }));
-
 };
 
 export default getLikedSongs;
