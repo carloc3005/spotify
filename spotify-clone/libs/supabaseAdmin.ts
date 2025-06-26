@@ -6,6 +6,7 @@ import { Price, Product} from "@/types";
 
 import { stripe } from "./stripe";
 import { toDateTime } from "./helpers";
+import { subscribe } from "diagnostics_channel";
 
 export const supabaseAdmin = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -97,5 +98,64 @@ const createOrRetrieveACustomer = async ({
 
         console.log(`New customer created and inserted for ${uuid}`);
         return customers.id;
+    }
+
+    return data.stripe_customer_id;
+};
+
+const copyBillingDetailsToCustomer = async (
+    uuid: string,
+    payment_method: Stripe.PaymentMethod
+) => {
+    const customer = payment_method.customer as string;
+    const { name, phone, address } = payment_method.billing_details;
+    if (!name || !phone || !address) return;
+
+
+    //@ts-ignore
+
+    await stripe.customers.update(customer, { name, phone, address });
+    const { error } = await supabaseAdmin
+        .from('users')
+        .update({
+            billing_address: {...address},
+            payment_method: {...payment_method[payment_method.type]}
+        })
+        .eq('id', uuid);
+    
+    if ( error ) throw error;
+};
+
+const manageSubscriptionStatusChange = async (
+    subscriptionId: string,
+    customerId: string,
+    createAction = false
+) => {
+    const { data: customerData, error: noCustomerError } = await supabaseAdmin
+        .from('customers')
+        .select('id')
+        .eq('stripe_customer_id', customerId)
+        .single();
+
+    if (noCustomerError) throw noCustomerError;
+
+    const { id: uuid } = customerData!;
+
+    const subscription = await stripe.subscriptions.retrieve(
+        subscriptionId,
+        {
+            expand: ["default_payment_method"]
+        }
+    );
+
+    const subscriptionData: Database["public"]["Tables"]["subscriptions"]["Insert"] = {
+        id: subscription.id,
+        user_id: uuid,
+        metadata: subscription.metadata
+        // @ts-ignore
+        status: subscription.status,
+        price_id: subscription.items.data[0].price.id,
+        // @ts-ignore
+        quantity: subscription.quantity
     }
 }
