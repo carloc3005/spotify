@@ -38,31 +38,12 @@ const AccountContent = () => {
 
     return (
         <div className="mb-7 px-6">
-            {!subscription && (
-                <div className="flex flex-col gap-y-4">
-                    <p>No active plan.</p>
-                    <Button
-                        onClick={subscribeModal.onOpen}
-                        className="w-[300px]"
-                    >
-                        Subscribe
-                    </Button>
-                </div>
-            )}
-            {subscription && (
-                <div className="flex flex-col gap-y-4">
-                    <p>
-                        You are currently on the <b>{subscription?.prices?.products?.name}</b> plan.
-                    </p>
-                    <Button
-                        disabled={loading || isLoading}
-                        onClick={redirectToCustomerPortal}
-                        className="w-[300px]"
-                    >
-                        Open customer portal
-                    </Button>
-                </div>
-            )}
+            <div className="flex flex-col gap-y-4">
+                <p className="text-green-500 text-lg font-semibold">Welcome to your account!</p>
+                <p className="text-neutral-400">
+                    You're logged in and can enjoy all the features of our music platform.
+                </p>
+            </div>
         </div>
     );
 }

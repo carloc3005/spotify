@@ -66,14 +66,6 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
                         <Button onClick={handleLogout} className="bg-white px-6 py-2">
                             Logout
                         </Button>
-                        {!subscription && (
-                            <Button
-                                onClick={subscribeModal.onOpen}
-                                className="bg-white px-6 py-2"
-                            >
-                                Subscribe
-                            </Button>
-                        )}
                         <Button onClick={() => { router.push('/account') }} className="bg-white">
                             <FaUserAlt />
                         </Button>
