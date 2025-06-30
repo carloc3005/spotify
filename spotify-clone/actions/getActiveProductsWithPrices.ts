@@ -15,9 +15,7 @@ const getActiveProductsWithPrices = async (): Promise<ProductWithPrice[]> => {
     .from("products")
     .select("*, prices(*)")
     .eq("active", true)
-    .eq("prices.active", true)
-    .order("metadata->index")
-    .order('created_at', { foreignTable: 'prices'});
+    .order("metadata->index");
 
   if (error) {
     console.log(error.message);

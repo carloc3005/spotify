@@ -37,7 +37,7 @@ export interface Price {
     type?: Stripe.Price.Type;
     interval?: Stripe.Price.Recurring.Interval;
     interval_count?: number;
-    trail_period_days?: number | null;
+    trial_period_days?: number | null;
     metadata?: Stripe.Metadata;
     products?: Product;
 }
@@ -60,7 +60,7 @@ export interface Subscription {
     ended_at?: string;
     cancel_at?: string;
     canceled_at?: string;
-    trail_start?: string;
-    trail_end?: string;
+    trial_start?: string;
+    trial_end?: string;
     prices?: Price;
 }
