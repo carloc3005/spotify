@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "sync-stripe": "ts-node --project libs/tsconfig.json libs/stripe-sync.ts"
+    "sync-stripe": "ts-node --project libs/tsconfig.json libs/stripe-sync.ts",
+    "export": "next build && next export"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.4",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@netlify/plugin-nextjs": "^5.7.2",
     "@swc/core": "^1.12.7",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
