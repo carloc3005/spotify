@@ -10,6 +10,8 @@ import Slider from "./Slider";
 import usePlayer from "@/hooks/usePlayer";
 import { useEffect, useState } from "react";
 import useSound from "use-sound";
+import SoundWaveIcon from "./SoundWaveIcon";
+import SoundWaveModal from "./SoundWaveModal";
 
 interface PlayerContentProps {
     song: Song;
@@ -23,6 +25,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     const player = usePlayer();
     const [volume, setVolume] = useState(1);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [showSoundWaveModal, setShowSoundWaveModal] = useState(false);
 
     const onPlayNext = () => {
         if (player.ids.length === 0) {
@@ -110,33 +113,54 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
 
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-3 h-full">
-            <div className="flex w-full justify-start ">
-                <div className="flex items-center gap-x-4">
-                    <MediaItem data={song} />
-                    <LikeButton songId={song.id} />
-
+        <>
+            <div className="grid grid-cols-2 md:grid-cols-3 h-full">
+                <div className="flex w-full justify-start ">
+                    <div className="flex items-center gap-x-4">
+                        <MediaItem data={song} />
+                        <LikeButton songId={song.id} />
+                    </div>
+                </div>
+                <div className="flex md:hidden col-auto w-full justify-end items-center gap-x-2">
+                    <SoundWaveIcon 
+                        onClick={() => setShowSoundWaveModal(true)}
+                        isPlaying={isPlaying}
+                        className="flex-shrink-0"
+                    />
+                    <div onClick={handlePlay} className="h-10 w-10 flex items-center justify-center rounded-full bg-white p-1 cursor-pointer">
+                        <Icon size={30} className="text-black" />
+                    </div>
+                </div>
+                <div className="hidden h-full md:flex justify-center items-center w-full max-w-[722px] gap-x-6 ">
+                    <AiFillStepBackward onClick={onPlayPrevious} size={30} className="text-neutral-400 cursor-pointer hover:text-white transition" />
+                    <div onClick={handlePlay} className="flex items-center justify-center h-10 w-10 rounded-full bg-white p-1 cursor-pointer">
+                        <Icon size={30} className="text-black" />
+                    </div>
+                    <AiFillStepForward onClick={onPlayNext} size={30} className="text-neutral-400 cursor-pointer hover:text-white transition" />
+                </div>
+                <div className="hidden md:flex w-full justify-end pr-2 ">
+                    <div className="flex items-center gap-x-2 w-[150px]">
+                        <SoundWaveIcon 
+                            onClick={() => setShowSoundWaveModal(true)}
+                            isPlaying={isPlaying}
+                            className="flex-shrink-0"
+                        />
+                        <VolumeIcon onClick={toggleMute} className="cursor-pointer" size={24} />
+                        <Slider value={volume} onChange={(value) => setVolume(value)} />
+                    </div>
                 </div>
             </div>
-            <div className="flex md:hidden col-auto w-full justify-end items-center ">
-                <div onClick={handlePlay} className="h-10 w-10 flex items-center justify-center rounded-full bg-white p-1 cursor-pointer">
-                    <Icon size={30} className="text-black" />
-                </div>
-            </div>
-            <div className="hidden h-full md:flex justify-center items-center w-full max-w-[722px] gap-x-6 ">
-                <AiFillStepBackward onClick={onPlayPrevious} size={30} className="text-neutral-400 cursor-pointer hover:text-white transition" />
-                <div onClick={handlePlay} className="flex items-center justify-center h-10 w-10 rounded-full bg-white p-1 cursor-pointer">
-                    <Icon size={30} className="text-black" />
-                </div>
-                <AiFillStepForward onClick={onPlayNext} size={30} className="text-neutral-400 cursor-pointer hover:text-white transition" />
-            </div>
-            <div className="hidden md:flex w-full justify-end pr-2 ">
-                <div className="flex items-center gap-x-2 w-[120px]">
-                    <VolumeIcon onClick={toggleMute} className="cursor-pointer" size={24} />
-                    <Slider value={volume} onChange={(value) => setVolume(value)} />
-                </div>
-            </div>
-        </div>
+            
+            {/* Sound Wave Modal */}
+            <SoundWaveModal
+                isOpen={showSoundWaveModal}
+                onClose={() => setShowSoundWaveModal(false)}
+                isPlaying={isPlaying}
+                onTogglePlay={handlePlay}
+                songTitle={song.title}
+                artist={song.author}
+            />
+        </>
     );
 };
 
