@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Figtree } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/sidebar";
-import SupabaseProvider from "@/providers/SupabaseProvider";
-import UserProvider from "@/providers/UserProvider";
+import AuthProvider from "@/providers/AuthProvider";
 import ModalProvider from "@/providers/ModalProvider";
 import ToasterProvider from "@/providers/ToasterProvider";
 import getSongsByUserId from "@/actions/getSongsByUserId";
@@ -33,13 +32,11 @@ export default async function RootLayout({
     <html lang="en">
       <body className={font.className}>
         <ToasterProvider />
-        <SupabaseProvider>
-          <UserProvider>
-            <ModalProvider products={products} />
-            <Sidebar songs={userSongs}>{children}</Sidebar>
-            <Player />
-          </UserProvider>
-        </SupabaseProvider>
+        <AuthProvider>
+          <ModalProvider products={products} />
+          <Sidebar songs={userSongs}>{children}</Sidebar>
+          <Player />
+        </AuthProvider>
       </body>
     </html>
   );

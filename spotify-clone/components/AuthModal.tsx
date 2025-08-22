@@ -1,19 +1,16 @@
 "use client";
 
-import { useSessionContext, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Modal from "./Modal";
 import { useRouter } from "next/navigation";
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
 import useAuthModal from "@/hooks/useAuthModal";
 import { useEffect } from "react";
+import { useSession, signIn } from "next-auth/react";
+import Button from "./Button";
 
 const AuthModal = () => {
-    const supabaseClient = useSupabaseClient();
     const router = useRouter();
-    const { session } = useSessionContext();
+    const { data: session } = useSession();
     const {onClose, isOpen} = useAuthModal();
-
 
     useEffect(() => {
         if (session) {
@@ -22,29 +19,38 @@ const AuthModal = () => {
         }
     }, [session, router, onClose]);
 
-
     const onChange = (open: boolean) => {
         if(!open) {
             onClose();
         }
     }
 
+    const handleSignIn = (provider: string) => {
+        signIn(provider, { callbackUrl: '/' });
+    };
+
     return (
-        <Modal title="Welcome back" description="Login to your account" isOpen={isOpen} onChange={() => {}}>
-            <Auth supabaseClient={supabaseClient}
-            theme="dark"
-            magicLink
-            providers = {["google", "discord", "spotify"]} 
-            appearance={{
-                theme: ThemeSupa,
-                variables: {
-                    default: {
-                        colors: {
-                            brand: '#404040',
-                            brandAccent: '#22c55e'
-                        }
-                    }
-                }}}/>
+        <Modal title="Welcome back" description="Login to your account" isOpen={isOpen} onChange={onChange}>
+            <div className="flex flex-col gap-4">
+                <Button 
+                    onClick={() => handleSignIn('google')}
+                    className="w-full bg-red-500 hover:bg-red-600"
+                >
+                    Sign in with Google
+                </Button>
+                <Button 
+                    onClick={() => handleSignIn('discord')}
+                    className="w-full bg-indigo-500 hover:bg-indigo-600"
+                >
+                    Sign in with Discord
+                </Button>
+                <Button 
+                    onClick={() => handleSignIn('spotify')}
+                    className="w-full bg-green-500 hover:bg-green-600"
+                >
+                    Sign in with Spotify
+                </Button>
+            </div>
         </Modal>
     );
 }

@@ -13,13 +13,18 @@
 ### 1. Environment Variables
 Before deploying, make sure to set up these environment variables in your Netlify dashboard:
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `STRIPE_API_KEY`
-- `STRIPE_PUBLISHABLE_KEY`
-- `STRIPE_WEBHOOK_SECRET`
+- `NEXTAUTH_SECRET`
+- `NEXTAUTH_URL` 
+- `DATABASE_URL` (Neon DB)
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `DISCORD_CLIENT_ID`
+- `DISCORD_CLIENT_SECRET`
+- `SPOTIFY_CLIENT_ID`
+- `SPOTIFY_CLIENT_SECRET`
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
 
 ### 2. Deploy to Netlify:
 
@@ -43,11 +48,13 @@ Before deploying, make sure to set up these environment variables in your Netlif
 
 #### Update Stripe Webhook URL:
 - Go to your Stripe Dashboard > Webhooks
-- Update the endpoint URL to: `https://your-netlify-site.netlify.app/api/webhooks`
+- Update the endpoint URL to: `https://sparkling-heliotrope-0d2ded.netlify.app/api/webhooks`
 
-#### Update Supabase Settings:
-- Go to Supabase Dashboard > Authentication > URL Configuration  
-- Add your Netlify URL to Site URL and Redirect URLs
+#### Update OAuth Provider Settings:
+- Add your Netlify URL to all OAuth provider redirect URIs
+- Google: Add `https://sparkling-heliotrope-0d2ded.netlify.app/api/auth/callback/google`
+- Discord: Add `https://sparkling-heliotrope-0d2ded.netlify.app/api/auth/callback/discord`  
+- Spotify: Add `https://sparkling-heliotrope-0d2ded.netlify.app/api/auth/callback/spotify`
 
 ### 4. Common Issues and Solutions:
 

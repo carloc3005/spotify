@@ -1,10 +1,9 @@
 "use client";
 
 import useAuthModal from "@/hooks/useAuthModal";
-import { SupabaseClient, useSession, useSessionContext } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useUser } from "@/hooks/useUser";
+import { useSession } from "next-auth/react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import toast from "react-hot-toast";
 
@@ -16,10 +15,10 @@ const LikeButton: React.FC<LikeButtonProps> = ({
     songId
 }) => {
     const router = useRouter();
-    const { supabaseClient } = useSessionContext();
+    const { data: session } = useSession();
     
     const authModal = useAuthModal();
-    const { user } = useUser();
+    const user = session?.user;
 
     const [isLiked, setIsLiked] = useState(false);
 
@@ -29,18 +28,17 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         }
 
         const fetchData = async () => {            
-            const { data, error } = await supabaseClient
-                .from('liked_songs')
-                .select('*')
-                .eq('user_id', user.id)
-                .eq('songs_id', songId)
-                .single();if(!error && data ) {
-                setIsLiked(true);
+            try {
+                const response = await fetch(`/api/liked-songs/check?songId=${songId}&userId=${user.id}`);
+                const data = await response.json();
+                setIsLiked(data.isLiked);
+            } catch (error) {
+                console.error('Error checking like status:', error);
             }
         }
 
         fetchData();
-    }, [songId, supabaseClient, user?.id]);
+    }, [songId, user?.id]);
 
     const Icon = isLiked ? AiFillHeart : AiOutlineHeart;    
     const handleLike = async () => {
@@ -48,36 +46,30 @@ const LikeButton: React.FC<LikeButtonProps> = ({
             return authModal.onOpen();
         }
 
-        if (isLiked) {            
-            const { error } = await supabaseClient
-                .from('liked_songs')
-                .delete()
-                .eq('user_id', user.id)
-                .eq('songs_id', songId);
+        try {
+            const response = await fetch('/api/liked-songs', {
+                method: isLiked ? 'DELETE' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    songId,
+                    userId: user.id
+                }),
+            });
 
-            if(error) {
-                toast.error(error.message);
+            if (response.ok) {
+                setIsLiked(!isLiked);
+                toast.success(isLiked ? 'Removed from liked songs' : 'Liked');
+                router.refresh();
             } else {
-                setIsLiked(false);
-                toast.success('Removed from liked songs');
+                const error = await response.json();
+                toast.error(error.message || 'Something went wrong');
             }
-        } else {            
-            const { error } = await supabaseClient
-                .from('liked_songs')
-                .insert({
-                    songs_id: songId,
-                    user_id: user.id
-                });
-
-            if (error) {
-                toast.error(error.message);
-            } else {
-                setIsLiked(true);
-                toast.success('Liked');
-            }
+        } catch (error) {
+            toast.error('Something went wrong');
+            console.error('Error toggling like:', error);
         }
-
-        router.refresh();
     }
 
     return(
