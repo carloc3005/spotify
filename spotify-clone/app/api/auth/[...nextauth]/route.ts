@@ -45,13 +45,14 @@ export const authOptions: NextAuthOptions = {
       return token
     },
   },
-  pages: {
-    signIn: '/auth/signin',
-    error: '/auth/error',
-  },
   session: {
     strategy: "database" as const,
   },
+  pages: {
+    signIn: "/",
+    error: "/",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
 }
 

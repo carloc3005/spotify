@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 
 import { stripe } from "@/libs/stripe";
-import { upsertProductRecord, upsertPriceRecord, manageSubscriptionStatusChange } from "@/libs/supabaseAdmin";
+import { upsertProductRecord, upsertPriceRecord, manageSubscriptionStatusChange } from "@/libs/neonAdmin";
 
 const relevantEvents = new Set ([
     'product.created',

@@ -6,14 +6,16 @@ import * as path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 import { stripe } from './stripe';
-import { upsertProductRecord, upsertPriceRecord } from './supabaseAdmin';
+// TODO: Replace with Neon database operations
+// import { upsertProductRecord, upsertPriceRecord } from './neonAdmin';
 
 const syncProductAndPrices = async (productId: string) => {
   try {
     console.log(`Fetching product from Stripe: ${productId}`);
     const product = await stripe.products.retrieve(productId);
-    console.log(`Upserting product: ${product.name}`);
-    await upsertProductRecord(product);
+    console.log(`Product fetched: ${product.name}`);
+    // TODO: Implement Neon database upsert
+    // await upsertProductRecord(product);
 
     console.log(`Fetching prices for ${product.name}...`);
     const prices = await stripe.prices.list({
@@ -22,15 +24,17 @@ const syncProductAndPrices = async (productId: string) => {
     });
 
     for (const price of prices.data) {
-      console.log(`Upserting price: ${price.id}`);
-      await upsertPriceRecord(price);
+      console.log(`Price found: ${price.id}`);
+      // TODO: Implement Neon database upsert
+      // await upsertPriceRecord(price);
     }
-    console.log('Sync complete!');
+    console.log('Sync complete! (Note: Database operations are commented out)');
   } catch (error) {
     console.error('Error syncing product and prices:', error);
   }
 };
 
 // The product ID provided by the user.
-const productIdToSync = 'prod_SZIMPMV0j5efuh';
-syncProductAndPrices(productIdToSync);
+// Uncomment the line below when you're ready to sync with Neon database
+// const productIdToSync = 'prod_SZIMPMV0j5efuh';
+// syncProductAndPrices(productIdToSync);
