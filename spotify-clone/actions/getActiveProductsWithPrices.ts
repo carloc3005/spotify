@@ -1,27 +1,40 @@
 import { Product, Price } from "@/types";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
 
 export interface ProductWithPrice extends Product {
   prices?: Price[];
 }
 
 const getActiveProductsWithPrices = async (): Promise<ProductWithPrice[]> => {
-  const supabase = createServerComponentClient({
-    cookies: cookies,
-  });
+  try {
+    // For now, return empty array since we're focusing on the core music functionality
+    // You can implement Stripe products/prices later if needed for subscription features
+    return [];
+    
+    // TODO: If you need Stripe products, implement this:
+    /*
+    const products = await prisma.product.findMany({
+      where: {
+        active: true,
+      },
+      include: {
+        prices: true,
+      },
+      orderBy: {
+        // You'll need to add an index field to your Product model if needed
+        createdAt: 'desc',
+      },
+    });
 
-  const { data, error } = await supabase
-    .from("products")
-    .select("*, prices(*)")
-    .eq("active", true)
-    .order("metadata->index");
-
-  if (error) {
-    console.log(error.message);
+    return products.map(product => ({
+      ...product,
+      prices: product.prices,
+    }));
+    */
+  } catch (error) {
+    console.log('Error fetching products:', error);
+    return [];
   }
-
-  return (data as any) || [];
 };
 
 export default getActiveProductsWithPrices;
