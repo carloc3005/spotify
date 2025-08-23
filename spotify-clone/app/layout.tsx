@@ -3,6 +3,7 @@ import { Figtree } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/sidebar";
 import AuthProvider from "@/providers/AuthProvider";
+import UserProvider from "@/providers/UserProvider";
 import ModalProvider from "@/providers/ModalProvider";
 import ToasterProvider from "@/providers/ToasterProvider";
 import getSongsByUserId from "@/actions/getSongsByUserId";
@@ -33,9 +34,11 @@ export default async function RootLayout({
       <body className={font.className}>
         <ToasterProvider />
         <AuthProvider>
-          <ModalProvider products={products} />
-          <Sidebar songs={userSongs}>{children}</Sidebar>
-          <Player />
+          <UserProvider>
+            <ModalProvider products={products} />
+            <Sidebar songs={userSongs}>{children}</Sidebar>
+            <Player />
+          </UserProvider>
         </AuthProvider>
       </body>
     </html>

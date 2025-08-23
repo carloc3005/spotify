@@ -1,39 +1,35 @@
 import { Song } from "@/types"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { prisma } from "@/lib/prisma"
 
 const getSongsByUserId = async(): Promise<Song[]> => {
     try {
-        const cookieStore = cookies()
-        const supabase = createServerComponentClient({
-            cookies: () => cookieStore
+        const session = await getServerSession(authOptions);
+
+        if (!session?.user?.id) {
+            return [];
+        }
+
+        const songs = await prisma.song.findMany({
+            where: {
+                userId: session.user.id
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
         });
 
-        const { data: sessionData, 
-            error: sessionError } 
-            = await supabase.auth.getSession();
-
-        if (sessionError) {
-            console.log(sessionError.message)
-            return [];
-        }    
-
-        if (!sessionData.session?.user?.id) {
-            return [];
-        }
-
-        const { data, error } = await supabase
-            .from('songs')
-            .select('*')
-            .eq('user_id', sessionData.session.user.id)
-            .order('created_at', { ascending: false});
-
-        if (error) {
-            console.log(error.message);
-            return [];
-        }
-
-        return (data as any) || [];
+        return songs.map(song => ({
+            id: song.id,
+            user_id: song.userId,
+            author: song.author,
+            title: song.title,
+            song_path: song.songPath,
+            image_path: song.imagePath,
+            created_at: song.createdAt.toISOString(),
+            updated_at: song.updatedAt.toISOString()
+        }));
     } catch (error) {
         console.log('Error in getSongsByUserId:', error);
         return [];

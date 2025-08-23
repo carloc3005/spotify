@@ -13,9 +13,15 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'zsbthvandpmhbesxdvjh.supabase.co',
+        hostname: 'uploadthing.com',
         port: '',
-        pathname: '/storage/v1/object/public/**',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'utfs.io',
+        port: '',
+        pathname: '/**',
       },
     ],
   },

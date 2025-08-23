@@ -1,19 +1,14 @@
 import { Song } from "@/types";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 const useLoadSongUrl = (song: Song | undefined) => {
-    const supabaseClient = useSupabaseClient();
-
     if (!song) {
         return '';
     }
 
-    const {data: songData} = supabaseClient
-        .storage
-        .from('songs')
-        .getPublicUrl(song.song_path);
-
-    return songData.publicUrl;    
+    // If using a CDN or static hosting, return the direct URL
+    // If using UploadThing or another service, you might need to transform the path
+    // For now, assuming the song_path contains the full URL or relative path
+    return song.song_path;    
 }
 
 export default useLoadSongUrl;

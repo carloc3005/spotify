@@ -1,13 +1,10 @@
 import { Song } from "@/types";
-import { useSessionContext } from "@supabase/auth-helpers-react";
 import { useEffect, useMemo, useState } from "react"
 import toast from "react-hot-toast";
 
 const useGetSongById = (id?: string) => {
     const [isLoading, setIsLoading] = useState(false);
     const [song, setSong] = useState<Song | undefined>();
-
-    const { supabaseClient } = useSessionContext();
 
     useEffect(() => {
         if (!id) {
@@ -16,23 +13,25 @@ const useGetSongById = (id?: string) => {
 
         setIsLoading(true);
         const fetchSong = async () => {
-            const { data, error } = await supabaseClient
-                .from('songs')
-                .select('*')
-                .eq('id', id)
-                .single();
-
-            if (error) {
+            try {
+                const response = await fetch(`/api/songs/${id}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch song');
+                }
+                
+                const data = await response.json();
+                setSong(data as Song);
+            } catch (error) {
+                toast.error('Failed to load song');
+                console.error('Error fetching song:', error);
+            } finally {
                 setIsLoading(false);
-                return toast.error(error.message);
             }
-
-            setSong(data as Song);
-            setIsLoading(false);
         };
 
         fetchSong();
-    }, [id, supabaseClient]);
+    }, [id]);
 
     return useMemo(() => ({
         isLoading,

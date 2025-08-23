@@ -8,7 +8,7 @@ import { twMerge } from "tailwind-merge";
 import Button from "./Button";
 import useAuthModal from "@/hooks/useAuthModal";
 import useSubscribeModal from "@/hooks/useSubscribeModal";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { signOut } from "next-auth/react";
 import { useUser } from "@/hooks/useUser";
 import { FaUserAlt } from "react-icons/fa";
 import toast from "react-hot-toast";
@@ -24,18 +24,14 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
     const subscribeModal = useSubscribeModal();
     const router = useRouter();
 
-    const supabaseClient = useSupabaseClient();
     const { user, subscription } = useUser();
+    
     const handleLogout = async () => {
-        const { error } = await supabaseClient.auth.signOut();
-
-        // TODO: Reset any playing songs
-        router.refresh();
-
-        if (error) {
-            toast.error(error.message);
-        } else {
+        try {
+            await signOut({ callbackUrl: '/' });
             toast.success('Logged out!')
+        } catch (error) {
+            toast.error('Error logging out');
         }
     }
 

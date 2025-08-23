@@ -1,32 +1,36 @@
 import { Song } from "@/types"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { prisma } from "@/lib/prisma"
 import getSongs from "./getSongs";
 
 const getSongsByTitle = async(title: string): Promise<Song[]> => {
     try {
-        const cookieStore = cookies()
-        const supabase = createServerComponentClient({
-            cookies: () => cookieStore
-        });
-        
         if(!title) {
             const allSongs = await getSongs();
             return allSongs;
         }
 
-        const {data, error } = await supabase 
-        .from('songs')
-        .select('*')
-        .ilike('title', `%${title}%`)
-        .order('created_at', {ascending: false});
+        const songs = await prisma.song.findMany({
+            where: {
+                title: {
+                    contains: title,
+                    mode: 'insensitive'
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
 
-        if(error) {
-            console.log(error);
-            return [];
-        }
-
-        return (data as any) || [];
+        return songs.map(song => ({
+            id: song.id,
+            user_id: song.userId,
+            author: song.author,
+            title: song.title,
+            song_path: song.songPath,
+            image_path: song.imagePath,
+            created_at: song.createdAt.toISOString(),
+            updated_at: song.updatedAt.toISOString()
+        }));
     } catch (error) {
         console.log('Error in getSongsByTitle:', error);
         return [];
