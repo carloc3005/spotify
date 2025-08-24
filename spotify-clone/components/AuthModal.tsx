@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, FieldValues, SubmitHandler } from "react-hook-form";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
-import { FaGoogle, FaDiscord, FaGithub, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaGoogle, FaDiscord, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useEffect } from "react";
 
 import Modal from "./Modal";
@@ -16,7 +16,7 @@ import Button from "./Button";
 const AuthModal = () => {
     const router = useRouter();
     const { data: session } = useSession();
-    const { onClose, isOpen } = useAuthModal();
+    const { onClose, isOpen, isSignUpMode } = useAuthModal();
     const [isLoading, setIsLoading] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -35,6 +35,12 @@ const AuthModal = () => {
             onClose();
         }
     }, [session, router, onClose]);
+
+    useEffect(() => {
+        if (isOpen) {
+            setIsSignUp(isSignUpMode);
+        }
+    }, [isOpen, isSignUpMode]);
 
     const onChange = (open: boolean) => {
         if (!open) {
@@ -55,6 +61,7 @@ const AuthModal = () => {
         try {
             if (isSignUp) {
                 // Handle sign up
+                console.log('Attempting to register:', { name: data.name, email: data.email });
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -65,17 +72,40 @@ const AuthModal = () => {
                     }),
                 });
 
+                console.log('Registration response status:', response.status);
+
                 if (response.ok) {
                     toast.success('Account created successfully!');
                     setIsSignUp(false);
                     reset();
                 } else {
-                    const error = await response.json();
-                    toast.error(error.message || 'Something went wrong');
+                    try {
+                        const error = await response.json();
+                        console.log('Registration error:', error);
+                        toast.error(error.message || 'Something went wrong');
+                    } catch (parseError) {
+                        // If response is not JSON, use status text
+                        console.log('Parse error:', parseError);
+                        toast.error(`Error: ${response.status} ${response.statusText}`);
+                    }
                 }
             } else {
-                // For now, just show success for sign in since we don't have password auth
-                toast.success('Please use OAuth providers below for sign in');
+                // Handle sign in with credentials
+                console.log('Attempting to sign in:', { email: data.email });
+                const result = await signIn('credentials', {
+                    email: data.email,
+                    password: data.password,
+                    redirect: false,
+                });
+
+                if (result?.error) {
+                    console.error('Sign in error:', result.error);
+                    toast.error('Invalid email or password');
+                } else if (result?.ok) {
+                    toast.success('Signed in successfully!');
+                    onClose();
+                    router.refresh();
+                }
             }
         } catch (error) {
             toast.error('Something went wrong');
@@ -95,8 +125,11 @@ const AuthModal = () => {
             if (result?.error) {
                 console.error('OAuth Error:', result.error);
                 toast.error(`Sign in failed: ${result.error}`);
-            } else {
+            } else if (result?.ok) {
                 toast.success('Sign in successful!');
+                // Close modal and refresh
+                onClose();
+                window.location.href = '/';
             }
         } catch (error) {
             console.error('OAuth Error:', error);
@@ -192,14 +225,6 @@ const AuthModal = () => {
                     >
                         <FaDiscord size={20} />
                         Continue with Discord
-                    </Button>
-                    
-                    <Button 
-                        onClick={() => handleOAuthSignIn('github')}
-                        className="w-full bg-gray-800 hover:bg-gray-900 flex items-center justify-center gap-3"
-                    >
-                        <FaGithub size={20} />
-                        Continue with GitHub
                     </Button>
                 </div>
             </div>

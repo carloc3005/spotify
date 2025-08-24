@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
   try {
@@ -7,7 +8,10 @@ export async function POST(request: Request) {
     const { email, password, name } = body;
 
     if (!email || !password || !name) {
-      return new NextResponse("Missing fields", { status: 400 });
+      return NextResponse.json(
+        { message: "Missing required fields" }, 
+        { status: 400 }
+      );
     }
 
     // Check if user already exists
@@ -16,21 +20,26 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
-      return new NextResponse("User already exists", { status: 400 });
+      return NextResponse.json(
+        { message: "User already exists" }, 
+        { status: 400 }
+      );
     }
 
-    // Create user without hashed password (for now)
-    // We'll store the password in plain text temporarily for testing
-    // In production, you should always hash passwords!
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create user with hashed password
     const user = await prisma.user.create({
       data: {
         email,
         name,
-        // Not storing password in database for now
+        password: hashedPassword,
       }
     });
 
     return NextResponse.json({
+      message: "Account created successfully",
       user: {
         id: user.id,
         email: user.email,
@@ -38,7 +47,10 @@ export async function POST(request: Request) {
       }
     });
   } catch (error) {
-    console.log(error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error("Registration error:", error);
+    return NextResponse.json(
+      { message: "Internal server error" }, 
+      { status: 500 }
+    );
   }
 }
