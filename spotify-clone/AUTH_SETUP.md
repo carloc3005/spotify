@@ -37,7 +37,7 @@ npx prisma generate
 ✅ **OAuth Providers (with icons)**
 - 🔴 Google authentication
 - 🟣 Discord authentication  
-- 🟢 Spotify authentication
+- ⚫ GitHub authentication
 
 ✅ **UI Improvements**
 - Clean form with proper inputs

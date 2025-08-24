@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, FieldValues, SubmitHandler } from "react-hook-form";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
-import { FaGoogle, FaDiscord, FaSpotify, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaGoogle, FaDiscord, FaGithub, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useEffect } from "react";
 
 import Modal from "./Modal";
@@ -84,8 +84,26 @@ const AuthModal = () => {
         }
     };
 
-    const handleOAuthSignIn = (provider: string) => {
-        signIn(provider, { callbackUrl: '/' });
+    const handleOAuthSignIn = async (provider: string) => {
+        try {
+            setIsLoading(true);
+            const result = await signIn(provider, { 
+                callbackUrl: '/',
+                redirect: false 
+            });
+            
+            if (result?.error) {
+                console.error('OAuth Error:', result.error);
+                toast.error(`Sign in failed: ${result.error}`);
+            } else {
+                toast.success('Sign in successful!');
+            }
+        } catch (error) {
+            console.error('OAuth Error:', error);
+            toast.error('Sign in failed. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -177,11 +195,11 @@ const AuthModal = () => {
                     </Button>
                     
                     <Button 
-                        onClick={() => handleOAuthSignIn('spotify')}
-                        className="w-full bg-green-500 hover:bg-green-600 flex items-center justify-center gap-3"
+                        onClick={() => handleOAuthSignIn('github')}
+                        className="w-full bg-gray-800 hover:bg-gray-900 flex items-center justify-center gap-3"
                     >
-                        <FaSpotify size={20} />
-                        Continue with Spotify
+                        <FaGithub size={20} />
+                        Continue with GitHub
                     </Button>
                 </div>
             </div>

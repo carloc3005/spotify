@@ -1,7 +1,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import DiscordProvider from "next-auth/providers/discord"
-import SpotifyProvider from "next-auth/providers/spotify"
+import GitHubProvider from "next-auth/providers/github"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 
@@ -21,14 +21,9 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.DISCORD_CLIENT_ID!,
       clientSecret: process.env.DISCORD_CLIENT_SECRET!,
     }),
-    SpotifyProvider({
-      clientId: process.env.SPOTIFY_CLIENT_ID!,
-      clientSecret: process.env.SPOTIFY_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          scope: "user-read-email user-read-private user-library-read playlist-read-private"
-        }
-      }
+    GitHubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     }),
   ],
   callbacks: {
@@ -43,6 +38,11 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
       }
       return token
+    },
+    async signIn({ user, account, profile, email, credentials }) {
+      // Log successful sign-ins for debugging
+      console.log('Sign-in attempt:', { user: user?.email, account: account?.provider });
+      return true;
     },
   },
   session: {
