@@ -27,6 +27,7 @@ const AuthModal = () => {
             email: "",
             password: "",
         },
+        mode: "onChange"
     });
 
     useEffect(() => {
@@ -61,7 +62,6 @@ const AuthModal = () => {
         try {
             if (isSignUp) {
                 // Handle sign up
-                console.log('Attempting to register:', { name: data.name, email: data.email });
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -72,8 +72,6 @@ const AuthModal = () => {
                     }),
                 });
 
-                console.log('Registration response status:', response.status);
-
                 if (response.ok) {
                     toast.success('Account created successfully!');
                     setIsSignUp(false);
@@ -81,17 +79,14 @@ const AuthModal = () => {
                 } else {
                     try {
                         const error = await response.json();
-                        console.log('Registration error:', error);
                         toast.error(error.message || 'Something went wrong');
                     } catch (parseError) {
                         // If response is not JSON, use status text
-                        console.log('Parse error:', parseError);
                         toast.error(`Error: ${response.status} ${response.statusText}`);
                     }
                 }
             } else {
                 // Handle sign in with credentials
-                console.log('Attempting to sign in:', { email: data.email });
                 const result = await signIn('credentials', {
                     email: data.email,
                     password: data.password,
@@ -99,7 +94,6 @@ const AuthModal = () => {
                 });
 
                 if (result?.error) {
-                    console.error('Sign in error:', result.error);
                     toast.error('Invalid email or password');
                 } else if (result?.ok) {
                     toast.success('Signed in successfully!');
@@ -123,7 +117,6 @@ const AuthModal = () => {
             });
             
             if (result?.error) {
-                console.error('OAuth Error:', result.error);
                 toast.error(`Sign in failed: ${result.error}`);
             } else if (result?.ok) {
                 toast.success('Sign in successful!');
@@ -132,7 +125,6 @@ const AuthModal = () => {
                 window.location.href = '/';
             }
         } catch (error) {
-            console.error('OAuth Error:', error);
             toast.error('Sign in failed. Please try again.');
         } finally {
             setIsLoading(false);
@@ -150,38 +142,75 @@ const AuthModal = () => {
                 {/* Email/Password Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
                     {isSignUp && (
-                        <Input
-                            id="name"
-                            type="text"
-                            disabled={isLoading}
-                            {...register("name", { required: isSignUp })}
-                            placeholder="Your name"
-                        />
+                        <div>
+                            <Input
+                                id="name"
+                                type="text"
+                                disabled={isLoading}
+                                {...register("name", { 
+                                    required: isSignUp ? "Name is required" : false,
+                                    minLength: {
+                                        value: 1,
+                                        message: "Name must be at least 1 character"
+                                    },
+                                    maxLength: {
+                                        value: 50,
+                                        message: "Name must be less than 50 characters"
+                                    }
+                                })}
+                                placeholder="Your name"
+                            />
+                            {errors.name && (
+                                <p className="text-red-500 text-sm mt-1">{errors.name.message as string}</p>
+                            )}
+                        </div>
                     )}
                     
-                    <Input
-                        id="email"
-                        type="email"
-                        disabled={isLoading}
-                        {...register("email", { required: true })}
-                        placeholder="Email address"
-                    />
-                    
-                    <div className="relative">
+                    <div>
                         <Input
-                            id="password"
-                            type={showPassword ? "text" : "password"}
+                            id="email"
+                            type="email"
                             disabled={isLoading}
-                            {...register("password", { required: true, minLength: 6 })}
-                            placeholder="Password"
+                            {...register("email", { 
+                                required: "Email is required",
+                                pattern: {
+                                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                    message: "Please enter a valid email address"
+                                }
+                            })}
+                            placeholder="Email address"
                         />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                            {showPassword ? <FaEyeSlash /> : <FaEye />}
-                        </button>
+                        {errors.email && (
+                            <p className="text-red-500 text-sm mt-1">{errors.email.message as string}</p>
+                        )}
+                    </div>
+                    
+                    <div>
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                disabled={isLoading}
+                                {...register("password", { 
+                                    required: "Password is required",
+                                    minLength: {
+                                        value: 6,
+                                        message: "Password must be at least 6 characters"
+                                    }
+                                })}
+                                placeholder="Password"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                            </button>
+                        </div>
+                        {errors.password && (
+                            <p className="text-red-500 text-sm mt-1">{errors.password.message as string}</p>
+                        )}
                     </div>
                     
                     <Button type="submit" disabled={isLoading} className="w-full">

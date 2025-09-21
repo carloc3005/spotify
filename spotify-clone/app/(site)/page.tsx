@@ -14,8 +14,11 @@ export default async function Home() {
       <Header>
         <div className="mb-2">
           <h1 className="text-white text-3xl font-semibold">
-            Welcome back
+            Discover Amazing Music
           </h1>
+          <p className="text-neutral-400 text-sm mt-1">
+            Explore our music collection and find your next favorite song. Join us for exclusive features!
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 mt-4">
             <ListItem 
               image="/images/liked.png"
