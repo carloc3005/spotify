@@ -9,6 +9,14 @@ export async function POST(request: Request) {
   const { price, quantity = 1, metadata = {} } = await request.json();
 
   try {
+    // Check if Stripe is properly configured
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json(
+        { error: "Stripe is not configured. Please contact support." },
+        { status: 500 }
+      );
+    }
+
     const authSession = await getServerSession();
     
     if (!authSession?.user?.email) {
